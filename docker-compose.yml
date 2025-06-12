@@ -21,6 +21,7 @@ services:
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
       - --api.dashboard=true
     labels:
+      - traefik.enable=true
       # --- Middleware definieren ---
       - traefik.http.middlewares.hsts.headers.forceSTSHeader=true
       - traefik.http.middlewares.hsts.headers.stsSeconds=63072000
