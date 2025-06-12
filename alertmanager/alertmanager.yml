@@ -1,0 +1,43 @@
+# ────────── Alertmanager v0.28+ ­Config ──────────
+global:
+  resolve_timeout: 5m
+
+  # SMTP – Werte kommen aus Environment-Variablen
+  smtp_smarthost: ${SMTP_HOST}
+  smtp_from: ${SMTP_FROM}
+  smtp_auth_username: ${SMTP_USER}
+  smtp_auth_password: ${SMTP_PASSWORD}
+  smtp_require_tls: true
+
+# ────────── Routing & Gruppierung ──────────
+route:
+  receiver: email-all                # Standard­empfänger
+  group_by: ['alertname', 'instance']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+
+  # Optionale Unterroute für „critical“ – gleiche Mail, anderer Betreff
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: email-critical
+      repeat_interval: 24h           # kritische Alarme alle 24 Stunden neu schicken
+
+# ────────── Receiver ­Definitionen ──────────
+receivers:
+  - name: email-all
+    email_configs:
+      - to: ${SMTP_TO}
+        send_resolved: true          # „[RESOLVED] …“ sobald grün
+        headers:
+          subject: '[ALERT] {{ .CommonLabels.alertname }}'
+
+  - name: email-critical
+    email_configs:
+      - to: ${SMTP_TO}
+        send_resolved: true
+        headers:
+          subject: '[CRITICAL] {{ .CommonLabels.alertname }}'
+
+inhibit_rules: []                    # Silence-Regeln

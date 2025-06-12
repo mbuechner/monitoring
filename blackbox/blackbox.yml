@@ -1,0 +1,21 @@
+modules:
+  http_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      preferred_ip_protocol: ip4
+      valid_status_codes: []   # alles <400 gilt als OK
+  http_ddb_title:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      fail_if_not_body_matches_regexp:
+        - "<title>\\s*Deutsche\\s+Digitale\\s+Bibliothek"
+  tls_expiry:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      tls: true
+      tls_config:
+        insecure_skip_verify: false   # oder true bei Self-Signed

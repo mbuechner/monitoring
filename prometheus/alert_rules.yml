@@ -1,0 +1,27 @@
+groups:
+- name: blackbox
+  rules:
+  - alert: EndpointDown
+    expr: probe_success == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "{{ $labels.instance }} ist nicht erreichbar"
+      description: "Überprüfung schlägt fehl → {{ $labels.job }}"
+  - alert: SSLCertExpiringSoon
+    expr: (probe_ssl_earliest_cert_expiry - time()) < 14*24*3600
+    for: 1h
+    labels:
+      severity: warning
+    annotations:
+      summary: "Zertifikat läuft bald ab ({{ $labels.instance }})"
+      description: "Restlaufzeit < 14 Tage"
+  - alert: SSLCertExpired
+    expr: (probe_ssl_earliest_cert_expiry - time()) <= 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Zertifikat abgelaufen ({{ $labels.instance }})"
+      description: "Bitte schnellstmöglich erneuern!"

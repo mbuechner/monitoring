@@ -1,2 +1,2 @@
-# monitoring
-DDBstatus with Prometheus, blockbox_exporter, Alertmanager and Grafana
+# Monitoring
+*DDBstatus* with Prometheus, blockbox_exporter, Alertmanager and Grafana

@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────
+# Prometheus Haupt­konfiguration
+# ─────────────────────────────────────────────────────────────
+global:
+  scrape_interval: 30s          # wie oft Metriken abgeholt werden
+  evaluation_interval: 30s      # wie oft Alert-Regeln ausgewertet werden
+  scrape_timeout: 10s           # Abbruch­grenze für langsame Endpunkte
+
+  external_labels:              # landen in allen Time-Series; hilfreich bei Remote-Storage
+    monitor: 'primary'
+
+# ── Alertmanager-Anbindung ───────────────────────────────────
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+# ── Regeldateien (separat in alert_rules.yml) ────────────────
+rule_files:
+  - alert_rules.yml
+
+# ─────────────────────────────────────────────────────────────
+# Scrapes
+# ─────────────────────────────────────────────────────────────
+scrape_configs:
+
+  # 1) Self-scrape, damit Prometheus sich selbst überwacht
+  - job_name: 'prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2) Blackbox-Probe-Jobs (alle Targets kommen aus targets.json)
+  - job_name: 'blackbox_probes'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]        # Default-Module falls im SD-Eintrag keines gesetzt ist
+
+    # --- File Service Discovery --------------------------------
+    file_sd_configs:
+      - files:
+          - /opt/bitnami/prometheus/conf/sd/targets.json
+        refresh_interval: 1m    # live-Reload der JSON-Datei
+
+    # --- Relabel-Magie ----------------------------------------
+    relabel_configs:
+      # URL aus SD-Eintrag → __param_target
+      - source_labels: [__address__]
+        target_label: __param_target
+
+      # Falls in targets.json ein Label "module" steht → als Modul-Parameter übernehmen
+      - source_labels: [module]
+        regex: (.+)
+        target_label: __param_module
+
+      # Schönes Instance-Label fürs Dashboard
+      - source_labels: [__param_target]
+        target_label: instance
+
+      # Eigentlichen HTTP-Request an den Blackbox-Exporter schicken
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  # 3) Blackbox-Exporter selbst überwachen
+  - job_name: 'blackbox_exporter'
+    static_configs:
+      - targets: ['blackbox:9115']
