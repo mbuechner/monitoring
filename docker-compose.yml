@@ -30,7 +30,7 @@ services:
       # - "8080:8080"           # Traefik-Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik_data:/letsencrypt
+      - traefik:/letsencrypt
     networks: [monitoring]
     restart: unless-stopped
 
@@ -43,7 +43,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml:ro
       - ./prometheus/sd:/opt/bitnami/prometheus/conf/sd:ro
-      - prometheus_data:/bitnami/prometheus
+      - prometheus:/opt/bitnami/prometheus/data
     # zum Debuggen
     # labels:
     #   - traefik.enable=true
@@ -78,7 +78,7 @@ services:
         --web.external-url=https://status.deutsche-digitale-bibliothek.de/alertmanager
     volumes:
       - ./alertmanager/alertmanager.yml:/opt/bitnami/alertmanager/conf/config.yml:ro
-      - alertmanager_data:/opt/bitnami/alertmanager/data
+      - alertmanager:/opt/bitnami/alertmanager/data
     ports: ["9093:9093"]
     # zum Debuggen
     # labels:
@@ -107,7 +107,7 @@ services:
     networks: [monitoring]
     ports: ['3000:3000']
     volumes:
-      - grafana_data:/bitnami/grafana
+      - grafana:/opt/bitnami/grafana/data
     labels:
       - traefik.enable=true
       - traefik.http.routers.grafana.rule=Host(`status.deutsche-digitale-bibliothek.de`)
@@ -118,10 +118,10 @@ services:
     restart: unless-stopped
 
 volumes:
-  prometheus_data:
-  grafana_data:
-  alertmanager_data:
-  traefik_data:
+  prometheus:
+  grafana:
+  alertmanager:
+  traefik:
 
 networks:
-  monitoring: {}            # internes Netz für alle
+  monitoring: {} # internes Netz für alle
