@@ -15,15 +15,16 @@ services:
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.web.http.redirections.entrypoint.permanent=true
 
-      # HSTS (2 Jahre, preload-fähig)
-      - --entrypoints.websecure.http.headers.stsseconds=63072000
-      - --entrypoints.websecure.http.headers.stspreload=true
-
       # ── ACME / Dashboard etc. (wie bisher) ─────────────────
       - --certificatesresolvers.le.acme.tlschallenge=true
       - --certificatesresolvers.le.acme.email=m.buechner@dnb.de
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
       - --api.dashboard=true
+    labels:
+      # --- Middleware definieren ---
+      - traefik.http.middlewares.hsts.headers.forceSTSHeader=true
+      - traefik.http.middlewares.hsts.headers.stsSeconds=63072000
+      - traefik.http.middlewares.hsts.headers.stsPreload=true
     ports: ['80:80', '443:443']
       # - "8080:8080"           # Traefik-Dashboard
     volumes:
@@ -111,6 +112,7 @@ services:
       - traefik.http.routers.grafana.rule=Host(`status.deutsche-digitale-bibliothek.de`)
       - traefik.http.routers.grafana.entrypoints=websecure
       - traefik.http.routers.grafana.tls.certresolver=le
+      - traefik.http.routers.grafana.middlewares=hsts
     depends_on: [prometheus]
     restart: unless-stopped
 
