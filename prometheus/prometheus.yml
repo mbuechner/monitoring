@@ -54,8 +54,12 @@ scrape_configs:
         regex: (.+)
         target_label: __param_module
 
-      # Schönes Instance-Label fürs Dashboard
+      # Schönes Instance-Label fürs Dashboard (HTTP Basic Auth entfernen)
       - source_labels: [__param_target]
+        target_label: instance  
+      - source_labels: [__param_target]
+        regex: '(https?:\/\/)[^@]+@(.+)'
+        replacement: '${1}${2}'
         target_label: instance
 
       # Eigentlichen HTTP-Request an den Blackbox-Exporter schicken
@@ -88,6 +92,10 @@ scrape_configs:
 
       # Schönes Instance-Label fürs Dashboard
       - source_labels: [__param_target]
+        target_label: instance  
+      - source_labels: [__param_target]
+        regex: '(https?:\/\/)[^@]+@(.+)'
+        replacement: '${1}${2}'
         target_label: instance
 
       # Eigentlichen HTTP-Request an den Blackbox-Exporter schicken

@@ -5,14 +5,6 @@ modules:
     http:
       preferred_ip_protocol: ip4
       valid_status_codes: []   # alles <400 gilt als OK
-  http_2xx_basic_auth:
-    prober: http
-    timeout: 10s
-    http:
-      valid_status_codes: []
-      basic_auth:
-        username: ${TESTSYSTEM_USER}
-        password: ${TESTSYSTEM_PASSWORD}
   http_ddb_title:
     prober: http
     timeout: 10s

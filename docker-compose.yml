@@ -94,14 +94,17 @@ services:
     user: "1001"
     container_name: grafana
     environment:
-      # Anonyme Besucher dürfen nur LESEN
+      - GF_SERVER_ROOT_URL=https://status.deutsche-digitale-bibliothek.de
+      # Anonyme Nutzer aktivieren
       - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer  # nur Dashboard‐Lesen :contentReference[oaicite:1]{index=1}
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Deutsche Digitale Bibliothek
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      # Login-Maske verstecken
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
       # interne User melden sich normal an
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
-      - GF_INSTALL_PLUGINS=heywesty-trafficlight-panel
-      # Drittes Netz‐Schloss
+      # Netz-Schloss
       - GF_SECURITY_COOKIE_SECURE=true     # Cookies nur via HTTPS
       - GF_SECURITY_ALLOW_EMBEDDING=false  # verhindert Click-Jacking
     networks: [monitoring]
